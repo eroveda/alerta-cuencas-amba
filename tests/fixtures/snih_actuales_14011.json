@@ -1,0 +1,1 @@
+{"d":{"__type":"WebSSRHv2_1.WCFIntegracion.CRespuestaMedicionesCodigo","Mediciones":[{"ExtensionData":{},"Codigo":1,"FechaHora":"\/Date(1793756700000)\/","NombreCodigo":"Altura","Valor":0.03}],"ExtensionData":{},"MsgErr":"","RespuestaOK":true}}

@@ -1,0 +1,147 @@
+:root {
+  --papel: #f3efe6;
+  --tinta: #16130f;
+  --tinta-suave: #5b544a;
+  --linea: #d6cfc1;
+  --superficie: #fbf9f4;
+  --verde: #2f7d4f;
+  --amarillo: #e3b417;
+  --naranja: #e0661b;
+  --rojo: #c4221b;
+  --agua: #1f5f8b;
+  --sin-dato: #9a9184;
+  --fuente: "Archivo", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --r: 4px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --papel: #141210;
+    --tinta: #f1ece2;
+    --tinta-suave: #a79f92;
+    --linea: #34302a;
+    --superficie: #1c1a17;
+    --agua: #6fb0db;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fuente);
+  display: flex;
+  flex-direction: column;
+}
+
+.barra {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.25rem 0.8rem;
+  border-bottom: 3px solid var(--tinta);
+}
+.marca { display: flex; align-items: center; gap: 0.6rem; }
+.marca-punto {
+  width: 0.8rem; height: 0.8rem; border-radius: 50%;
+  background: var(--rojo);
+  box-shadow: 0 0 0 0 var(--rojo);
+  animation: latido 2.4s ease-out infinite;
+}
+@keyframes latido {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--rojo) 60%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 0.6rem transparent; }
+}
+@media (prefers-reduced-motion: reduce) { .marca-punto { animation: none; } }
+h1 { margin: 0; font-size: clamp(1.15rem, 0.9rem + 1.2vw, 1.6rem); font-weight: 800; letter-spacing: -0.02em; }
+h1 em { font-style: normal; color: var(--tinta-suave); font-weight: 600; }
+.fase {
+  margin: 0; font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase;
+  letter-spacing: 0.08em; padding: 0.25rem 0.55rem; border: 1.5px solid var(--tinta); border-radius: var(--r);
+}
+
+.layout { flex: 1; display: grid; grid-template-columns: 1fr minmax(320px, 400px); min-height: 0; }
+.mapa { min-height: 60vh; background: var(--superficie); }
+.panel { overflow-y: auto; padding: 1rem 1.25rem 1.5rem; border-left: 1px solid var(--linea); }
+
+h2 {
+  font-size: 0.72rem; font-family: var(--mono); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--tinta-suave); margin: 1.6rem 0 0.6rem;
+  padding-bottom: 0.35rem; border-bottom: 1px solid var(--linea);
+}
+.aviso-legal {
+  margin: 0; font-size: 0.82rem; line-height: 1.4; padding: 0.6rem 0.75rem;
+  background: var(--superficie); border-left: 3px solid var(--naranja);
+}
+
+.zonas { list-style: none; margin: 0; padding: 0; }
+.zona {
+  display: grid; grid-template-columns: 0.55rem 1fr auto; align-items: center; gap: 0.7rem;
+  padding: 0.55rem 0.4rem; border-radius: var(--r); cursor: pointer;
+  transition: background-color 150ms ease;
+}
+.zona:hover, .zona:focus-visible { background: var(--superficie); outline: none; }
+.zona:focus-visible { box-shadow: inset 0 0 0 2px var(--agua); }
+.zona-barra { align-self: stretch; border-radius: 2px; background: var(--c); }
+.zona-nombre { font-weight: 600; }
+.zona-piloto {
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+  margin-left: 0.4rem; color: var(--agua); vertical-align: middle;
+}
+.zona-detalle { display: block; font-size: 0.78rem; color: var(--tinta-suave); margin-top: 0.15rem; }
+.nivel {
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+  padding: 0.15rem 0.45rem; border-radius: var(--r); color: #fff; background: var(--c);
+}
+.nivel[data-nivel="amarillo"] { color: #1d1700; }
+
+.estaciones { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.estacion { padding: 0.6rem 0.7rem; background: var(--superficie); border-radius: var(--r); }
+.estacion-nombre { font-size: 0.85rem; font-weight: 600; }
+.estacion-datos { display: flex; gap: 1.1rem; margin-top: 0.3rem; font-family: var(--mono); }
+.dato b { display: block; font-size: 1.35rem; font-weight: 600; letter-spacing: -0.02em; }
+.dato small { font-size: 0.66rem; color: var(--tinta-suave); text-transform: uppercase; letter-spacing: 0.06em; }
+.dato .sube { color: var(--naranja); }
+.dato .baja { color: var(--agua); }
+.estacion[data-viejo="true"] { opacity: 0.55; }
+.estacion[data-viejo="true"] .estacion-nombre::after {
+  content: " · sin datos recientes"; font-weight: 400; color: var(--rojo);
+}
+.nota { font-size: 0.75rem; color: var(--tinta-suave); line-height: 1.4; margin: 0.6rem 0 0; }
+
+.aeropuertos { list-style: none; margin: 0; padding: 0; }
+.aeropuerto {
+  display: grid; grid-template-columns: 1fr auto; gap: 0.1rem 0.6rem; align-items: baseline;
+  padding: 0.4rem 0; border-bottom: 1px dashed var(--linea);
+}
+.aeropuerto-nombre { font-size: 0.85rem; font-weight: 600; }
+.aeropuerto-lluvia { font-family: var(--mono); font-size: 0.8rem; color: var(--tinta-suave); }
+.aeropuerto[data-lluvia="moderada"] .aeropuerto-lluvia { color: var(--agua); font-weight: 600; }
+.aeropuerto[data-lluvia="fuerte"] .aeropuerto-lluvia { color: var(--agua); font-weight: 800; text-transform: uppercase; }
+.aeropuerto-tormenta {
+  grid-column: 1 / -1; font-family: var(--mono); font-size: 0.7rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em; color: var(--rojo);
+}
+.aeropuerto[data-viejo="true"] { opacity: 0.5; }
+
+.pronostico { font-family: var(--mono); font-size: 0.85rem; line-height: 1.6; }
+.pronostico b { font-size: 1.35rem; }
+
+.pie { margin-top: 1.8rem; font-size: 0.74rem; color: var(--tinta-suave); }
+.pie p { margin: 0 0 0.4rem; }
+.fuentes { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.fuentes li { font-family: var(--mono); padding: 0.1rem 0.4rem; border: 1px solid var(--linea); border-radius: var(--r); }
+.fuentes li[data-ok="false"] { border-color: var(--rojo); color: var(--rojo); }
+
+.leaflet-popup-content { font-family: var(--fuente); font-size: 0.85rem; }
+.popup-desc { margin: 0.4rem 0 0; color: #444; }
+
+@media (max-width: 780px) {
+  .layout { grid-template-columns: 1fr; }
+  .mapa { min-height: 55vh; }
+  .panel { border-left: 0; border-top: 1px solid var(--linea); padding: 1rem; }
+  .barra { padding: 0.75rem 1rem; }
+}
