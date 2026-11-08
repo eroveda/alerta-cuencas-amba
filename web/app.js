@@ -4,6 +4,7 @@
 // textContent, nunca como HTML.
 
 const REFRESCO_MS = 60_000;
+const ESTADO_VIEJO_MS = 45 * 60_000; // el poll corre cada ~10 min
 // Debe coincidir con VERSION_ESQUEMA en alertas/estado.py (docs/contrato-estado.md).
 const VERSION_ESQUEMA = 1;
 const COLOR = {
@@ -179,14 +180,94 @@ function pronostico(estado) {
 
 function pie(estado) {
   document.getElementById("aviso-legal").textContent = estado.aviso_legal;
-  document.getElementById("fase").textContent = `Fase ${estado.fase}`;
-  document.getElementById("actualizado").textContent = `Actualizado ${hora(estado.generado)}`;
+  const atraso = Date.now() - new Date(estado.generado).getTime();
+  document.getElementById("actualizado").textContent = atraso > ESTADO_VIEJO_MS
+    ? `⚠ Datos sin actualizar desde ${hora(estado.generado)}`
+    : `Actualizado ${hora(estado.generado)}`;
   document.getElementById("fuentes").replaceChildren(...Object.entries(estado.fuentes).map(([n, f]) =>
     el("li", { textContent: `${f.ok ? "●" : "✕"} ${n}`, title: f.error || "ok", dataset: { ok: String(f.ok) } })));
 }
 
+// ── El río ahora: cifra principal, frase en lenguaje de observación y gráfico ──
+const VERSION_SERIE = 1;
+const NOMBRE_EST = { SFER: "San Fernando", BSAS: "Buenos Aires", LPLA: "La Plata" };
+const TENDENCIA_HORAS = 3;
+const UMBRAL_ESTABLE_M = 0.05;
+const DATO_VIEJO_MS = 3 * 3_600_000;
+let serieActual = null;
+let estActual = "SFER";
+
+const decimal = (v) => Math.abs(v).toFixed(2).replace(".", ",");
+const conSignoAR = (v) => `${v >= 0 ? "+" : "−"}${decimal(v)}`;
+
+function valorHace(serie, horas) {
+  const [tsUlt] = serie.at(-1);
+  const objetivo = new Date(tsUlt).getTime() - horas * 3_600_000;
+  return serie.findLast(([ts]) => new Date(ts).getTime() <= objetivo)?.[1] ?? null;
+}
+
+function fraseTendencia(residuos) {
+  const previo = valorHace(residuos, TENDENCIA_HORAS);
+  if (previo == null) return "";
+  const delta = residuos.at(-1)[1] - previo;
+  if (Math.abs(delta) < UMBRAL_ESTABLE_M) return ` y se mantiene estable en las últimas ${TENDENCIA_HORAS} h`;
+  const verbo = delta > 0 ? "viene subiendo" : "viene bajando";
+  return ` y ${verbo} (${delta > 0 ? "+" : "−"}${decimal(delta)} m en las últimas ${TENDENCIA_HORAS} h)`;
+}
+
+function frasePronostico(prono) {
+  if (!prono?.length) return "";
+  const pico = prono.reduce((a, b) => (b[1] > a[1] ? b : a));
+  return ` El INA pronostica una altura máxima de ${pico[1].toFixed(2).replace(".", ",")} m (escala del mareógrafo) el ${hora(pico[0])}.`;
+}
+
+function pintarRio() {
+  const est = serieActual?.estaciones?.[estActual];
+  const residuos = est?.residuo ?? [];
+  document.getElementById("rio-estacion").textContent = NOMBRE_EST[estActual];
+  const cifra = document.getElementById("rio-residuo");
+  const frase = document.getElementById("rio-frase");
+  const prono = estActual === "SFER" ? serieActual?.pronostico_sfer : [];
+  if (!serieActual) return; // todavía cargando: se mantiene el texto inicial
+  Grafico.dibujar(document.getElementById("grafico"), est, prono, new Date(serieActual.generado).getTime());
+  if (!residuos.length) {
+    cifra.textContent = "—";
+    delete cifra.dataset.signo;
+    frase.textContent = "Sin datos recientes del mareógrafo.";
+    return;
+  }
+  const [ts, r] = residuos.at(-1);
+  cifra.textContent = `${conSignoAR(r)} m`;
+  cifra.dataset.signo = r >= 0 ? "sube" : "baja";
+  const posicion = r >= 0 ? "por encima" : "por debajo";
+  const viejo = Date.now() - new Date(ts).getTime() > DATO_VIEJO_MS ? ` (último dato: ${hora(ts)})` : "";
+  frase.textContent = `En ${NOMBRE_EST[estActual]} el río está ${decimal(r)} m ${posicion} de la marea astronómica`
+    + `${fraseTendencia(residuos)}.${viejo}${prono?.length ? frasePronostico(prono) : ""}`;
+}
+
+for (const boton of document.querySelectorAll(".rio-tabs button")) {
+  boton.addEventListener("click", () => {
+    estActual = boton.dataset.est;
+    for (const b of document.querySelectorAll(".rio-tabs button")) b.setAttribute("aria-pressed", String(b === boton));
+    pintarRio();
+  });
+}
+
+async function refrescarRio() {
+  try {
+    const serie = await cargarJSON("data/serie.json");
+    if (serie.version !== VERSION_SERIE) throw new Error(`versión de serie ${serie.version}`);
+    serieActual = serie;
+    pintarRio();
+  } catch (err) {
+    document.getElementById("rio-residuo").textContent = "—";
+    document.getElementById("rio-frase").textContent = `No se pudo cargar la serie del río (${err.message}). Reintentando…`;
+  }
+}
+
 let geoZonas = null;
 async function refrescar() {
+  refrescarRio();
   try {
     geoZonas ??= await cargarJSON("data/zonas.geojson");
     const estado = await cargarJSON("data/estado.json");

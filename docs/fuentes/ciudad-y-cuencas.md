@@ -1,6 +1,6 @@
 # Fase 0 — Datos de la Ciudad de Buenos Aires y geometrías de cuencas (AMBA)
 
-Verificación hecha el 2026-11-03 desde la máquina del proyecto, con `curl` (sin cambiar el User-Agent) y, cuando curl estaba bloqueado, con un fetch web externo para **leer** fichas de datasets. Las descargas están en `/home/rove/proyectos/niño/data/samples/geo/` (son datos no confiables: no se ejecutó nada de ahí). La validación se hizo con shapely 2.2 y pyproj 3.8 en un venv aparte, corriendo bajo `heavy.sh` (cgroup de 2 GB).
+Verificación hecha el 2026-11-03 desde la máquina del proyecto, con `curl` (sin cambiar el User-Agent) y, cuando curl estaba bloqueado, con un fetch web externo para **leer** fichas de datasets. Las descargas están en `data/samples/geo/` (son datos no confiables: no se ejecutó nada de ahí). La validación se hizo con shapely 2.2 y pyproj 3.8 en un venv aparte, corriendo bajo `heavy.sh` (cgroup de 2 GB).
 
 Convenciones: ✅ usable · ⚠️ con limitaciones · ❌ no accesible. "Verificado" quiere decir descargado y abierto. Lo que no se pudo verificar está marcado como tal.
 
@@ -171,7 +171,7 @@ Para las dos cuencas en ⚠️ conviene delinearlas a partir de un MDE (MDE-Ar d
 
 ---
 
-## 6. Archivos descargados (`/home/rove/proyectos/niño/data/samples/geo/`)
+## 6. Archivos descargados (`data/samples/geo/`)
 
 - `caba/`: `cuencas_caba.geojson` (original), `cuencas_caba_valid_4326.geojson` (reparado), `arroyos.geojson`, `riesgo-hidrico.geojson` (GKBA, original), `riesgo-hidrico_4326.geojson` (reproyectado), `riesgo-hidrico.csv`, `sumideros-zona-{1..5}.csv`, `barrios_populares_caba.geojson`, `barrios_caba.geojson`
 - `cohife/`: `cohife.zip` (original; el SHP de 84 MB se borró después de filtrar), `.dbf/.prj/.shx/.cpg` y `cohife_amba.geojson`

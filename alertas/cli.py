@@ -17,6 +17,7 @@ from alertas.db import Base
 from alertas.estado import armar_estado
 from alertas.fuentes import ina, registro, smn_cap
 from alertas.modelos import Lectura
+from alertas.serie import HORAS_ATRAS, armar_serie
 from alertas.tiempo import ahora_utc
 from alertas.zonas import Zonas, construir_zonas
 
@@ -93,10 +94,17 @@ def poll(db: Base, zonas_path: Path, salida: Path, ahora: datetime) -> dict:
     zonas = Zonas(json.loads(zonas_path.read_text(encoding="utf-8")))
     estado = armar_estado(zonas, alertas, db.lecturas_desde(ahora - VENTANA_LECTURAS),
                           ina.resumen(puntos, ahora), fuentes, ahora)
-    tmp = salida.with_suffix(".tmp")
-    tmp.write_text(json.dumps(estado, ensure_ascii=False, indent=1, allow_nan=False), encoding="utf-8")
-    os.replace(tmp, salida)  # escritura atómica: el mapa nunca lee un archivo a medias
+    serie = armar_serie(db.lecturas_desde(ahora - timedelta(hours=HORAS_ATRAS)), puntos, ahora)
+    _escribir_json(salida.with_name("serie.json"), serie, indent=None)
+    _escribir_json(salida, estado, indent=1)
     return estado
+
+
+def _escribir_json(ruta: Path, datos: dict, indent: int | None) -> None:
+    """Escritura atómica: el mapa nunca lee un archivo a medias."""
+    tmp = ruta.with_suffix(".tmp")
+    tmp.write_text(json.dumps(datos, ensure_ascii=False, indent=indent, allow_nan=False), encoding="utf-8")
+    os.replace(tmp, ruta)
 
 
 def zonas(salida: Path) -> None:

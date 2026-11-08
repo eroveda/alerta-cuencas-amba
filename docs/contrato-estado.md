@@ -28,3 +28,14 @@ Todas las fechas son ISO 8601 en UTC.
 **Estación**, campos comunes: `id`, `nombre`, `lat`, `lon`, `zona`, `tipo` (`hidro`/`meteo`), `ts`, `viejo` (bool).
 - `hidro`: `altura` (m o `null`), `residuo` (m o `null`; solo SHN).
 - `meteo`: `lluvia`, `tormenta` (mismos valores que en la zona).
+
+## `web/data/serie.json` — versión 1
+
+Lo genera `alertas/serie.py` (`armar_serie`) en cada poll y lo dibuja `web/grafico.js`.
+
+| Clave | Tipo | Contenido |
+|---|---|---|
+| `version` | int | Versión del esquema (hoy 1; `VERSION_SERIE` en los dos lados) |
+| `generado` | fecha | Momento del poll |
+| `estaciones` | objeto `código SHN → {altura, astronomica, residuo}` | Cada una es una lista `[ts, valor]` ordenada; últimas 72 h y, para la marea astronómica, hasta +48 h |
+| `pronostico_sfer` | lista `[ts, main, p05, p95]` | Pronóstico INA de San Fernando desde ahora hasta +48 h (`p05`/`p95` pueden ser `null`) |

@@ -38,6 +38,8 @@ def test_poll_junta_fuentes_y_aisla_errores(tmp_path, fixture_text, monkeypatch)
     estado = json.loads(salida.read_text())
     assert estado["fuentes"]["snih:14011"]["ok"] is False
     assert "SNIH no responde" in estado["fuentes"]["snih:14011"]["error"]
+    serie = json.loads((tmp_path / "serie.json").read_text())
+    assert serie["estaciones"]["SFER"]["altura"], "la serie debe traer la altura de San Fernando"
     assert estado["fuentes"]["shn:SFER"]["ok"] is True
     assert estado["fuentes"]["smn_cap"]["ok"] is True
     assert estado["zonas"]["medrano"]["nivel_smn"] == "naranja"

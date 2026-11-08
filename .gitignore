@@ -5,3 +5,5 @@ __pycache__/
 data/samples/
 data/*.sqlite
 web/data/estado.json
+web/data/serie.json
+data/snapshots/

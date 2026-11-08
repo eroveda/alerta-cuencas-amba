@@ -18,6 +18,16 @@ Sistema cívico, abierto y sin fines de lucro de **alertas tempranas de inundaci
 > (Medrano, CABA) quedan solo en el tablero, sin avisos. Detalle y próximas acciones en
 > [docs/diseno-fase1.md §0](docs/diseno-fase1.md).
 
+## MVP público
+
+- **Web:** `web/` es una página estática: arriba, la sudestada en vivo (gráfico de 72 h + pronóstico INA 48 h);
+  abajo, el tablero por cuenca, el "por qué" y la sección para sumarse. Usa `estado.json` y `serie.json` (ver contrato).
+- **Hosting 24/7 gratis:** `.github/workflows/monitor.yml` hace el poll cada 10 min en GitHub Actions, conserva la
+  base SQLite en el caché y publica `web/` en GitHub Pages. No depende de la PC local.
+  Para activarlo: subir el repo a GitHub y en *Settings → Pages* elegir **GitHub Actions** como origen.
+- **Imagen para redes:** `uv run --with pillow python scripts/og.py` regenera `web/og.png`.
+- **Textos:** pitch para apoyo filantrópico en [docs/pitch.md](docs/pitch.md) y borradores para redes en [docs/redes.md](docs/redes.md).
+
 ## Uso
 
 ```bash
@@ -60,4 +70,4 @@ Detalle de todas las fuentes evaluadas: [docs/fuentes/README.md](docs/fuentes/RE
 ## Protección de memoria
 
 `scripts/monitor.sh` corre cada consulta con tope de 512 MB. Para procesos pesados usar
-`/home/rove/proyectos/AdrianSaenz/scripts/heavy.sh -- <comando>`.
+un wrapper con tope de memoria (`systemd-run --user --scope -p MemoryMax=...`).
